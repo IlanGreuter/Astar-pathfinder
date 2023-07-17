@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Unity.Collections;
 using Winkeldief.Utilities;
 
 namespace Winkeldief.Pathfinding
@@ -16,9 +16,41 @@ namespace Winkeldief.Pathfinding
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
         public static Vector3 CellToWorld(Vector3Int cell) => instance.map.GetCellCenterWorld(cell);
 
+        /// <summary>Returns a path with each node from start to end </summary>
+        public static Path FindPath(Vector3Int start, Vector3Int end)
+        {
+            return new Path(instance.astar.FindPath(new(start.x, start.y), new(end.x, end.y)), CellToWorld(Vector3Int.zero));
+        }
+
+        //Turns the tilemap into a grid that can be used for the astar algorithm
+        protected virtual void ConstructGrid()
+        { //Extension: Combine multiple tilemaps
+            map.CompressBounds();
+            var bounds = map.cellBounds;
+            
+            NativeArray<AstarTile> tiles = new(bounds.size.x * bounds.size.y, Allocator.Persistent);
+            for (int x = bounds.xMin, i = 0; x < bounds.xMax; x++, i++)
+            {
+                for (int y = bounds.yMin, j = 0; y < bounds.yMax; y++, j++)
+                {
+                    int index = i + (j * bounds.size.x);
+                    AstarTile tile = new(x, y, index);
+                    tile.Cost = GetTileCost(tile.ToVec3Int);
+                    tiles[index] = tile;
+                }
+            }
+
+            astar = new Astar(tiles, new(bounds.size.x, bounds.size.y), new(bounds.xMin, bounds.yMin));
+        }
+
+        private int GetTileCost(Vector3Int cell)
+        { //Extension: Allow different types of tiles to have different costs
+            return map.HasTile(cell) ? -1 : 1;
+        }
+
         private void OnValidate()
         {
-           AstarTile.AllowDiagonals = AllowDiagonals;
+            AstarTile.AllowDiagonals = AllowDiagonals;
         }
 
         protected override void Awake()
@@ -29,35 +61,10 @@ namespace Winkeldief.Pathfinding
             ConstructGrid();
         }
 
-        /// <summary>Returns a path with each node from start to end </summary>
-        public static Path FindPath(Vector3Int start, Vector3Int end)
+        protected override void OnDestroy()
         {
-            return new Path(instance.astar.FindPath(start, end), CellToWorld(Vector3Int.zero));
-        }
-
-        //Turns the tilemap into a grid that can be used for the astar algorithm
-        private void ConstructGrid()
-        { //Extension: Combine multiple tilemaps
-            map.CompressBounds();
-            var bounds = map.cellBounds;
-            
-            AstarTile[,] tiles = new AstarTile[bounds.size.x, bounds.size.y];
-            for (int x = bounds.xMin, i = 0; x < bounds.xMax; x++, i++)
-            {
-                for (int y = bounds.yMin, j = 0; y < bounds.yMax; y++, j++)
-                {
-                    AstarTile tile = new(x, y, 0);
-                    tile.Cost = GetTileCost(tile.ToVec3Int);
-                    tiles[i, j] = tile;
-                }
-            }
-
-            astar = new Astar(tiles, new Vector3Int(bounds.xMin, bounds.yMin));
-        }
-
-        private int GetTileCost(Vector3Int cell)
-        { //Extension: Allow different types of tiles to have different costs
-            return map.HasTile(cell) ? -1 : 1;
+            astar.Dispose();
+            base.OnDestroy();
         }
     }
 }

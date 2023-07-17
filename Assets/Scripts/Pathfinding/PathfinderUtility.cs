@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
+using Unity.Collections;
 
 namespace Winkeldief.Pathfinding
 {
     internal static class PathfinderUtility
     {
         public const int DirectMoveCost = 10, DiagonalMoveCost = 14;
+        public static bool IsHexGrid, AllowDiagonals;
 
         #region CalculateDistance
         public static int CalculateSquareDistance(int x1, int y1, int x2, int y2, bool allowDiagonals)
@@ -35,32 +38,64 @@ namespace Winkeldief.Pathfinding
         #endregion CalculateDistance
 
         #region GetNeighbours
-        public static IEnumerable<Vector3Int> GetSquareNeighbours(Vector3Int offset, bool includeDiagonals)
+
+        public static IEnumerable<int2> GetSquareNeighbours(int2 offset, bool includeDiagonals)
         {
-            yield return offset + new Vector3Int(-1, 0);
-            yield return offset + new Vector3Int(1, 0);
-            yield return offset + new Vector3Int(0, 1);
-            yield return offset + new Vector3Int(0, -1);
+            yield return offset + new int2(-1, 0);
+            yield return offset + new int2(1, 0);
+            yield return offset + new int2(0, 1);
+            yield return offset + new int2(0, -1);
 
             if (includeDiagonals)
             {
-                yield return offset + new Vector3Int(-1, 1);
-                yield return offset + new Vector3Int(1, 1);
-                yield return offset + new Vector3Int(-1, -1);
-                yield return offset + new Vector3Int(1, -1); 
+                yield return offset + new int2(-1, 1);
+                yield return offset + new int2(1, 1);
+                yield return offset + new int2(-1, -1);
+                yield return offset + new int2(1, -1); 
             }
         }
 
-        public static IEnumerable<Vector3Int> GetHexNeighbours(Vector3Int offset)
+        public static NativeArray<int2> GetSquareNeighboursArray(int2 offset, bool allowDiagonals)
         {
-            yield return offset + new Vector3Int(-1, 0);
-            yield return offset + new Vector3Int(1, 0); 
-            yield return offset + new Vector3Int(0, 1); 
-            yield return offset + new Vector3Int(0, -1);
+            NativeArray<int2> neighbours = new(allowDiagonals ? 8 : 4, Allocator.Temp);
+            neighbours[0] = offset + new int2(-1, 0);
+            neighbours[1] = offset + new int2(1, 0);
+            neighbours[2] = offset + new int2(0, 1);
+            neighbours[3] = offset + new int2(0, -1);
+            if (!allowDiagonals)
+                return neighbours;
+
+            neighbours[4] = offset + new int2(-1, 1);
+            neighbours[5] = offset + new int2(1, 1);
+            neighbours[6] = offset + new int2(-1, -1);
+            neighbours[7] = offset + new int2(1, -1);
+            return neighbours;
+        }
+
+        public static IEnumerable<int2> GetHexNeighbours(int2 offset)
+        {
+            yield return offset + new int2(-1, 0);
+            yield return offset + new int2(1, 0); 
+            yield return offset + new int2(0, 1); 
+            yield return offset + new int2(0, -1);
 
             bool isEven = (offset.y & 1) == 0;
-            yield return offset + (new Vector3Int(1, 1) * (isEven ? -1 : 1));
-            yield return offset + (new Vector3Int(1, -1) * (isEven ? -1 : 1));
+            yield return offset + (new int2(1, 1) * (isEven ? -1 : 1));
+            yield return offset + (new int2(1, -1) * (isEven ? -1 : 1));
+        }
+
+        public static NativeArray<int2> GetHexNeighboursArray(int2 offset)
+        {
+            NativeArray<int2> neighbours = new (6, Allocator.Temp);
+            neighbours[0] = offset + new int2(-1, 0);
+            neighbours[1] = offset + new int2(1, 0);
+            neighbours[2] = offset + new int2(0, 1);
+            neighbours[3] = offset + new int2(0, -1);
+
+            bool isEven = (offset.y & 1) == 0;
+            neighbours[2] = offset + (new int2(1, 1) * (isEven ? -1 : 1));
+            neighbours[3] = offset + (new int2(1, -1) * (isEven ? -1 : 1));
+            return neighbours;
         }
         #endregion GetNeighbours
     }

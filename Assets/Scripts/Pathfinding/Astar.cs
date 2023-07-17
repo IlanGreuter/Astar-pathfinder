@@ -1,92 +1,145 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Mathematics;
+using Unity.Collections;
 
 namespace Winkeldief.Pathfinding
 {
     public class Astar
     {
-        readonly AstarTile[,] tiles;
-        Vector3Int gridOffset;
+        readonly NativeArray<AstarTile> grid;
+        int2 gridSize, gridOffset;
 
-        public Astar(AstarTile[,] grid, Vector3Int offset)
+        private int GetIndex(int x, int y) => x + (y * gridSize.x);
+        private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
+        
+        /// <summary> Check if tile is within the bounds of the grid </summary>
+        private bool IsValid(int2 cell) =>
+            cell.x >= 0 && cell.x < gridSize.x
+                && cell.y >= 0 && cell.y < gridSize.y;
+
+        public Astar(NativeArray<AstarTile> tiles, int2 size, int2 offset)
         {
-            tiles = grid;
+            grid = tiles;
+            gridSize = size;
             gridOffset = offset;
         }
 
         //Returns a list of positions that form a path from start to end.
         //Will return null if no path was found
-        public List<Vector3Int> FindPath(Vector3Int start, Vector3Int end)
+        public List<Vector3Int> FindPath(int2 start, int2 end)
         {
             start -= gridOffset;
             end -= gridOffset;
 
-            if (!IsPathValid(start, end))
+            if (!IsValid(start) || !IsValid(end))
                 return null;
 
-            AstarTile startTile = tiles[start.x, start.y];
-            AstarTile endTile = tiles[end.x, end.y];
+            //Copy persistent array into a temp array
+            NativeArray<AstarTile> tiles = new(grid.Length, Allocator.Temp);
+            grid.CopyTo(tiles);
+
+            AstarTile startTile = tiles[GetIndex(start)];
+            AstarTile endTile = tiles[GetIndex(end)];
             startTile.CalculateCost(endTile);
+            startTile.G = 0;
+            tiles[startTile.Index] = startTile;
 
-            List<AstarTile> openTiles = new() { startTile };
-            List<AstarTile> closedTiles = new();
+            //Return if endTile is not walkable
+            if (endTile.Cost < 0)
+            {
+                tiles.Dispose();
+                return null;
+            }
 
+            NativeList<int> openTiles = new(Allocator.Temp);
+            NativeList<int> closedTiles = new(Allocator.Temp);
+            openTiles.Add(startTile.Index);
+
+            NativeArray<int2> neighbourOffsets = PathfinderUtility.GetSquareNeighboursArray(int2.zero, true);
+            
             //As long as we have tiles to search
-            while (openTiles.Count > 0)
-            { 
+            while (!openTiles.IsEmpty)
+            {
                 //Find best tile
-                AstarTile currentTile = openTiles.Aggregate((min, next) => min.Compare(next)); //Extension: This is very slow
-
-                //If tile is end, construct path
-                if (currentTile == endTile)
-                    return ConstructPath(endTile, true);
+                int currentIndex = GetLowestFIndex(tiles, openTiles); //Extension: This is very slow
+               
+                //If tile is end, stop searching
+                if (currentIndex == endTile.Index)
+                    break;
 
                 //Remove current from open and add to closed tiles
-                openTiles.Remove(currentTile);
-                closedTiles.Add(currentTile);
+                openTiles.RemoveAtSwapBack(openTiles.IndexOf(currentIndex));
+                closedTiles.Add(currentIndex);
 
+                AstarTile currentTile = tiles[currentIndex];
+                int adjecentFlags = AstarTile.GetNeighbourFlags(currentTile.Y);
+                
                 //Foreach neighbour
-                foreach (Vector3Int neighbour in currentTile.GetNeighbours(-gridOffset))
+                for (int i = 0; i < neighbourOffsets.Length; i++)
                 {
-                    //Skip if not in grid
-                    if (!IsValid(neighbour))
+                    int2 neighbour = currentTile.ToInt2 - gridOffset + neighbourOffsets[i];
+
+                    //Skip if not in grid or not adjecent
+                    if ((adjecentFlags & (1 << i)) == 0 || !IsValid(neighbour))
                         continue;
 
-                    AstarTile neigh = tiles[neighbour.x, neighbour.y];
+                    int nIndex = GetIndex(neighbour);
+                    AstarTile nTile = tiles[nIndex];
 
                     //Skip if already searched or if not walkable
-                    if (neigh.Cost < 0 || closedTiles.Contains(neigh))
+                    if (nTile.Cost < 0 || closedTiles.Contains(nIndex))
                         continue;
 
-                    bool isOpen = openTiles.Contains(neigh);
-                    int tempG = currentTile.G + currentTile.GetDistanceTo(neigh.X, neigh.Y);
+                    int tempG = currentTile.G + currentTile.GetDistanceTo(nTile.X, nTile.Y);
 
                     //If not yet searched or better path was found
-                    if (!isOpen || tempG < neigh.G)
+                    if (tempG < nTile.G)
                     {
-                        neigh.G = tempG;
-                        neigh.CalculateCost(endTile);
-                        neigh.previous = currentTile;
-                        
-                        if (!isOpen)
-                            openTiles.Add(neigh);
+                        nTile.G = tempG;
+                        nTile.CalculateCost(endTile);
+                        nTile.Previous = currentIndex;
+                        tiles[nIndex] = nTile;
+
+                        if (!openTiles.Contains(nIndex))
+                            openTiles.Add(nIndex);
                     }
                 }
             }
-            return null;
+
+            endTile = tiles[endTile.Index];
+            List<Vector3Int> path = (endTile.Previous != -1) ?
+                ConstructPath(tiles, endTile, true) : 
+                null;
+
+            //Dispose
+            tiles.Dispose();
+            openTiles.Dispose();
+            closedTiles.Dispose();
+            neighbourOffsets.Dispose();
+
+            return path;
+        }
+
+        private int GetLowestFIndex(NativeArray<AstarTile> tiles, NativeList<int> indices)
+        {
+            AstarTile lowest = tiles[indices[0]]; 
+            for (int i = 1; i < indices.Length; i++)
+                lowest = lowest.Compare(tiles[indices[i]]);
+            return lowest.Index;
         }
 
         /// <summary> Construct path once end has been found </summary>
-        private List<Vector3Int> ConstructPath(AstarTile end, bool includeStart)
+        private List<Vector3Int> ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
         {
             List<Vector3Int> path = new();
             AstarTile current = end;
 
-            while (current.previous != null)
+            while (current.Previous > -1)
             {
                 path.Add(current.ToVec3Int);
-                current = current.previous;
+                current = tiles[current.Previous];
             }
 
             if (includeStart) path.Add(current.ToVec3Int);
@@ -94,18 +147,10 @@ namespace Winkeldief.Pathfinding
             return path;
         }
 
-        /// <summary> Check if path could exist </summary>
-        private bool IsPathValid(Vector3Int start, Vector3Int end)
+        /// <summary> Disposes of the internally stored grid, freeing up memory </summary>
+        public void Dispose()
         {
-            if (!IsValid(start) || !IsValid(end))
-                return false;
-
-            return tiles[end.x, end.y].Cost >= 0;
+            grid.Dispose();
         }
-
-        /// <summary> Check if tile is in the grid </summary>
-        private bool IsValid(Vector3Int cell) =>
-            cell.x >= 0 && cell.x < tiles.GetUpperBound(0)
-                && cell.y >= 0 && cell.y < tiles.GetUpperBound(1);
     }
 }
