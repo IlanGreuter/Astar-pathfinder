@@ -26,12 +26,10 @@ namespace Winkeldief.Pathfinding
         }
 
         /// <summary> Calculates the G and H costs </summary>
-        public void CalculateCost(AstarTile start, AstarTile end)
+        public void CalculateCost(AstarTile end)
         {
             //Extension: Add tile's cost as well
-            //TODO: call only when called
             previous = null;
-            G = GetDistanceTo(start.X, start.Y);
             H = GetDistanceTo(end.X, end.Y);
         }
 

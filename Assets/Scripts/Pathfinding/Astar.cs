@@ -27,16 +27,12 @@ namespace Winkeldief.Pathfinding
 
             AstarTile startTile = tiles[start.x, start.y];
             AstarTile endTile = tiles[end.x, end.y];
-            startTile.CalculateCost(startTile, endTile);
+            startTile.CalculateCost(endTile);
 
             List<AstarTile> openTiles = new() { startTile };
             List<AstarTile> closedTiles = new();
 
-            //Prepare grid
-            for (int i = 0; i < tiles.GetLength(0); i++)
-                for (int j = 0; j < tiles.GetLength(1); j++)
-                    tiles[i, j].CalculateCost(startTile, endTile); //Extension: This can be moved later
-
+            //As long as we have tiles to search
             while (openTiles.Count > 0)
             { 
                 //Find best tile
@@ -70,6 +66,7 @@ namespace Winkeldief.Pathfinding
                     if (!isOpen || tempG < neigh.G)
                     {
                         neigh.G = tempG;
+                        neigh.CalculateCost(endTile);
                         neigh.previous = currentTile;
                         
                         if (!isOpen)
