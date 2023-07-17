@@ -1,30 +1,29 @@
-using System;
-using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
-    [Serializable]
+    [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
     public struct AstarTile
     {
-        public static bool IsHexGrid, AllowDiagonals;
-        
         public int X, Y;
         public int Cost; //This node's cost. -1 means unwalkable
 
+        public int F => G + H;
         public int G; // Cost from this tile to start node
         public int H; // Cost from this tile to end node
-        public int F => G + H;
 
         public int Index, Previous;
+        [ReadOnly] readonly int _tileType;
 
-        public AstarTile(int x, int y, int index)
+        public AstarTile(int x, int y, int index, int tiletype)
         {
             X = x;
             Y = y;
             Index = index;
+            _tileType = tiletype;
 
             G = int.MaxValue;
             H = 0;
@@ -43,31 +42,9 @@ namespace Winkeldief.Pathfinding
         /// <summary> Gets the distance from this tile to the coordinates </summary>
         public int GetDistanceTo(int x, int y)
         {
-            return IsHexGrid ? 
+            return _tileType == 6 ?
                 PathfinderUtility.CalculateHexDistance(X, Y, x, y) :
-                PathfinderUtility.CalculateSquareDistance(X, Y, x, y, AllowDiagonals);
-        }
-
-        /// <summary> Returns a list with all of the neighbours </summary>
-        public IEnumerable<int2> GetNeighbours(int2 offset)
-        {
-            foreach (int2 n in IsHexGrid ?
-                PathfinderUtility.GetHexNeighbours(new(X, Y)) :
-                PathfinderUtility.GetSquareNeighbours(new(X,Y), AllowDiagonals))
-                yield return n + offset;
-        }
-
-        /// <summary> Returns a list with all of the neighbours </summary>
-        public NativeArray<int2> GetNeighbourArray(int2 offset)
-        {
-            return (IsHexGrid) ? PathfinderUtility.GetHexNeighboursArray(new(X,Y)) :
-                PathfinderUtility.GetSquareNeighboursArray(new(X + offset.x,Y + offset.y), AllowDiagonals) ;
-        }
-
-        /// <summary> Equals if the X and Y components are the same </summary>
-        public bool Equals(AstarTile tile)
-        {
-            return tile.X == X && tile.Y == Y;
+                PathfinderUtility.CalculateSquareDistance(X, Y, x, y, _tileType == 8);
         }
 
         /// <summary> Returns the tile that should be evaluated first </summary>
@@ -75,7 +52,7 @@ namespace Winkeldief.Pathfinding
         {
             if (F != other.F)
                 return F < other.F ? this : other;
-            else 
+            else
                 return H <= other.H ? this : other;
         }
 
@@ -85,12 +62,12 @@ namespace Winkeldief.Pathfinding
         /// <param name="yPosition"> Only used for hex grids. 
         /// Neighbours coordinates may differ if the y position of the tile is even or odd.
         /// </param>
-        public static int GetNeighbourFlags(int yPosition)
+        public int GetNeighbourFlags(int yPosition)
         {
-            if (IsHexGrid)
+            if (_tileType == 6)
                 return (yPosition & 1) == 0 ? 95 : 175; // 0101 1111 : 1010 1111
             else
-                return AllowDiagonals ? 255 : 15; // 1111 1111 : 0000 1111
+                return (_tileType == 8) ? 255 : 15; // 1111 1111 : 0000 1111
         }
 
         /// <summary> Returns a Vector3Int with this tile's coordinates in the tilemap </summary>

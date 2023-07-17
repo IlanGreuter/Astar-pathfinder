@@ -1,19 +1,19 @@
-using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using Unity.Mathematics;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace Winkeldief.Pathfinding
 {
-    public class Astar
+    [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
+    public struct Astar
     {
-        readonly NativeArray<AstarTile> grid;
-        int2 gridSize, gridOffset;
+        [ReadOnly] readonly NativeArray<AstarTile> grid;
+        [ReadOnly] readonly int2 gridSize, gridOffset;
 
         private int GetIndex(int x, int y) => x + (y * gridSize.x);
         private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
-        
+
         /// <summary> Check if tile is within the bounds of the grid </summary>
         private bool IsValid(int2 cell) =>
             cell.x >= 0 && cell.x < gridSize.x
@@ -28,13 +28,13 @@ namespace Winkeldief.Pathfinding
 
         //Returns a list of positions that form a path from start to end.
         //Will return null if no path was found
-        public List<Vector3Int> FindPath(int2 start, int2 end)
+        public NativeList<int2> FindPath(int2 start, int2 end)
         {
             start -= gridOffset;
             end -= gridOffset;
 
             if (!IsValid(start) || !IsValid(end))
-                return null;
+                return new(Allocator.Temp);
 
             //Copy persistent array into a temp array
             NativeArray<AstarTile> tiles = new(grid.Length, Allocator.Temp);
@@ -50,7 +50,7 @@ namespace Winkeldief.Pathfinding
             if (endTile.Cost < 0)
             {
                 tiles.Dispose();
-                return null;
+                return new(Allocator.Temp);
             }
 
             NativeList<int> openTiles = new(Allocator.Temp);
@@ -58,13 +58,13 @@ namespace Winkeldief.Pathfinding
             openTiles.Add(startTile.Index);
 
             NativeArray<int2> neighbourOffsets = PathfinderUtility.GetSquareNeighboursArray(int2.zero, true);
-            
+
             //As long as we have tiles to search
             while (!openTiles.IsEmpty)
             {
                 //Find best tile
                 int currentIndex = GetLowestFIndex(tiles, openTiles); //Extension: This is very slow
-               
+
                 //If tile is end, stop searching
                 if (currentIndex == endTile.Index)
                     break;
@@ -74,8 +74,8 @@ namespace Winkeldief.Pathfinding
                 closedTiles.Add(currentIndex);
 
                 AstarTile currentTile = tiles[currentIndex];
-                int adjecentFlags = AstarTile.GetNeighbourFlags(currentTile.Y);
-                
+                int adjecentFlags = currentTile.GetNeighbourFlags(currentTile.Y);
+
                 //Foreach neighbour
                 for (int i = 0; i < neighbourOffsets.Length; i++)
                 {
@@ -109,9 +109,9 @@ namespace Winkeldief.Pathfinding
             }
 
             endTile = tiles[endTile.Index];
-            List<Vector3Int> path = (endTile.Previous != -1) ?
-                ConstructPath(tiles, endTile, true) : 
-                null;
+            NativeList<int2> path = (endTile.Previous != -1) ?
+                ConstructPath(tiles, endTile, true) :
+                new(Allocator.Temp);
 
             //Dispose
             tiles.Dispose();
@@ -124,26 +124,25 @@ namespace Winkeldief.Pathfinding
 
         private int GetLowestFIndex(NativeArray<AstarTile> tiles, NativeList<int> indices)
         {
-            AstarTile lowest = tiles[indices[0]]; 
+            AstarTile lowest = tiles[indices[0]];
             for (int i = 1; i < indices.Length; i++)
                 lowest = lowest.Compare(tiles[indices[i]]);
             return lowest.Index;
         }
 
         /// <summary> Construct path once end has been found </summary>
-        private List<Vector3Int> ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
+        private NativeList<int2> ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
         {
-            List<Vector3Int> path = new();
+            NativeList<int2> path = new(Allocator.Temp);
             AstarTile current = end;
 
             while (current.Previous > -1)
             {
-                path.Add(current.ToVec3Int);
+                path.Add(current.ToInt2);
                 current = tiles[current.Previous];
             }
 
-            if (includeStart) path.Add(current.ToVec3Int);
-            path.Reverse();
+            if (includeStart) path.Add(current.ToInt2);
             return path;
         }
 

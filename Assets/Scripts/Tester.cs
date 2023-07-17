@@ -1,3 +1,6 @@
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Winkeldief.Pathfinding;
@@ -13,8 +16,22 @@ public class Tester : MonoBehaviour
         cam = Camera.main;
     }
 
+    [ContextMenu("TimerTest")]
+    private void TimerTest()
+    {
+        float startTime = Time.realtimeSinceStartup;
+        
+        for (int i = 0; i < 1; i++)
+        {
+            Pathfinder.FindPath(new(-4, 3), new(43, -6));
+        }
+        //Debug.Log("Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f));
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.T))
+            TimerTest();
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             c = HoveredTile();
