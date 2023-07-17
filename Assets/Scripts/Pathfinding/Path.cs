@@ -49,12 +49,12 @@ namespace Winkeldief.Pathfinding
                 return;
 
             List<Vector3Int> compressedPath = new();
-            Vector3Int lastMove = Vector3Int.zero;
+            Vector3 lastMove = Vector3.zero;
 
             //Form new path
             for (int i = 0; i < path.Count - 1; i++)
             {
-                Vector3Int v = path[i + 1] - path[i];
+                Vector3 v = Pathfinder.CellToWorld(path[i + 1]) - Pathfinder.CellToWorld(path[i]);
                 if (lastMove != v)
                     compressedPath.Add(path[i]);
                 lastMove = v;
@@ -76,7 +76,7 @@ namespace Winkeldief.Pathfinding
         public List<Vector3> ToWorld(Vector3 offset)
         {
             offset += worldOffset;
-            return path.Select(v => (Vector3)v + offset).ToList();
+            return path.Select(v => Pathfinder.CellToWorld(v)).ToList();
         }
     }
 }

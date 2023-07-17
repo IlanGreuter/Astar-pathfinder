@@ -14,7 +14,7 @@ namespace Winkeldief.Pathfinding
         [Tooltip("Whether to allow diagonal movement in non-hex grids")] public bool AllowDiagonals;
 
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
-        public static Vector3 CellToWorld(Vector3Int cell) => instance.map.CellToWorld(cell) + instance.map.tileAnchor;
+        public static Vector3 CellToWorld(Vector3Int cell) => instance.map.GetCellCenterWorld(cell);
 
         private void OnValidate()
         {
