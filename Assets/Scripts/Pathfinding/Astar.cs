@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
-    internal class Astar
+    public class Astar
     {
         readonly AstarTile[,] tiles;
         Vector3Int gridOffset;
 
-        internal Astar(AstarTile[,] grid, Vector3Int offset)
+        public Astar(AstarTile[,] grid, Vector3Int offset)
         {
             tiles = grid;
             gridOffset = offset;
@@ -35,12 +35,12 @@ namespace Winkeldief.Pathfinding
             //Prepare grid
             for (int i = 0; i < tiles.GetLength(0); i++)
                 for (int j = 0; j < tiles.GetLength(1); j++)
-                    tiles[i, j].CalculateCost(startTile, endTile); //This can be removed later
+                    tiles[i, j].CalculateCost(startTile, endTile); //Extension: This can be moved later
 
             while (openTiles.Count > 0)
-            {
+            { 
                 //Find best tile
-                AstarTile currentTile = openTiles.Aggregate((min, next) => min.Compare(next));
+                AstarTile currentTile = openTiles.Aggregate((min, next) => min.Compare(next)); //Extension: This is very slow
 
                 //If tile is end, construct path
                 if (currentTile == endTile)
@@ -63,9 +63,10 @@ namespace Winkeldief.Pathfinding
                     if (neigh.Cost < 0 || closedTiles.Contains(neigh))
                         continue;
 
-                    //If not yet searched
                     bool isOpen = openTiles.Contains(neigh);
                     int tempG = currentTile.G + currentTile.GetDistanceTo(neigh.X, neigh.Y);
+
+                    //If not yet searched or better path was found
                     if (!isOpen || tempG < neigh.G)
                     {
                         neigh.G = tempG;

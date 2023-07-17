@@ -22,7 +22,7 @@ namespace Winkeldief.Pathfinding
 
         public Path(List<Vector3Int> path, Vector3 offset)
         {
-            this.path = path;
+            this.path = path is not null ? path : new();
             worldOffset = offset;
         }
 

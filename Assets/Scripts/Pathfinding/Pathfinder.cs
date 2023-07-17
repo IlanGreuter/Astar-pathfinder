@@ -8,17 +8,13 @@ namespace Winkeldief.Pathfinding
     public class Pathfinder : Singleton<Pathfinder>
     {
         [SerializeField] Tilemap map;
-        public List<Vector3Int> a = new();
-
         Astar astar;
 
         [Header("Pathfinding Config")]
         [Tooltip("Whether to allow diagonal movement in non-hex grids")] public bool AllowDiagonals;
 
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
-        public static Vector3 CellToWorld(Vector3Int cell) => instance.map.WorldToCell(cell);
-
-        [SerializeField] PathDrawer pDrawer;
+        public static Vector3 CellToWorld(Vector3Int cell) => instance.map.CellToWorld(cell) + instance.map.tileAnchor;
 
         private void OnValidate()
         {
@@ -31,23 +27,17 @@ namespace Winkeldief.Pathfinding
             AstarTile.IsHexGrid = map.cellLayout == GridLayout.CellLayout.Hexagon;
             AstarTile.AllowDiagonals = AllowDiagonals;
             ConstructGrid();
-            a = PathfinderUtility.CompressPath(a);
         }
 
-        [ContextMenu("FindPath")]
-        private void Test()
+        /// <summary>Returns a path with each node from start to end </summary>
+        public static Path FindPath(Vector3Int start, Vector3Int end)
         {
-            a = FindPath(a[0], a[^1]);
-            pDrawer.SetPath(a);
+            return new Path(instance.astar.FindPath(start, end), CellToWorld(Vector3Int.zero));
         }
 
-        public List<Vector3Int> FindPath(Vector3Int start, Vector3Int end)
-        {
-            return astar.FindPath(start, end);
-        }
-
+        //Turns the tilemap into a grid that can be used for the astar algorithm
         private void ConstructGrid()
-        {
+        { //Extension: Combine multiple tilemaps
             map.CompressBounds();
             var bounds = map.cellBounds;
             
@@ -65,9 +55,8 @@ namespace Winkeldief.Pathfinding
             astar = new Astar(tiles, new Vector3Int(bounds.xMin, bounds.yMin));
         }
 
-
         private int GetTileCost(Vector3Int cell)
-        {
+        { //Extension: Allow different types of tiles to have different costs
             return map.HasTile(cell) ? -1 : 1;
         }
     }
