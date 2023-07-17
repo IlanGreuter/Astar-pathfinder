@@ -1,0 +1,492 @@
+fileFormatVersion: 2
+guid: 485182d6a6830a14c9d05aeaf3d50ccf
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 0
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 183
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 600
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80c5263bfd4a5ba4599c4173ce5e3d7a
+      internalID: -884645334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_1
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 600
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3518a05f18fa93d4294cc57d6f817229
+      internalID: -622796342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_2
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 600
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 045c166299641844a8f2cad14a9ac97e
+      internalID: 1666863591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_3
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 600
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d487ae46abf02414585329072bd7ebd6
+      internalID: 1454711736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 400
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d16a2b60877a0f04ab15780454b7588c
+      internalID: -1953107826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_5
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 400
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51f716dfb4fa8d04aa199830dd4ffd4b
+      internalID: -2048830331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_6
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 400
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5797861c776f9a143a7bbaec44531ee5
+      internalID: 346754253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_7
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 400
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30ca3f2dc01cb414cb428adf2251bb67
+      internalID: -1458833195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4360f232507f03148a60941a249d4e6f
+      internalID: -975112573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_9
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 200
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b474342e432b87148a47f295091f8e18
+      internalID: -822502597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_10
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 200
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47a9d0d607be78e4e9c850fb7f6e067a
+      internalID: 329176485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_11
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 200
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf49995012c48b44ab2006ef59f39f33
+      internalID: -1276110439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c841b13805eb65e48ac7be2eb14f6451
+      internalID: 441436159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_13
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 0
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8766069c58e81242b54c55dd986db97
+      internalID: 780186332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_14
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 505285c9203ae4b4088685da5832b513
+      internalID: -650292034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hex_pointed_top_tiles_15
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 200
+        height: 200
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc421765adfb11d4b8d24e869e73db79
+      internalID: -1167364603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Hex_pointed_top_tiles_0: -884645334
+      Hex_pointed_top_tiles_1: -622796342
+      Hex_pointed_top_tiles_10: 329176485
+      Hex_pointed_top_tiles_11: -1276110439
+      Hex_pointed_top_tiles_12: 441436159
+      Hex_pointed_top_tiles_13: 780186332
+      Hex_pointed_top_tiles_14: -650292034
+      Hex_pointed_top_tiles_15: -1167364603
+      Hex_pointed_top_tiles_2: 1666863591
+      Hex_pointed_top_tiles_3: 1454711736
+      Hex_pointed_top_tiles_4: -1953107826
+      Hex_pointed_top_tiles_5: -2048830331
+      Hex_pointed_top_tiles_6: 346754253
+      Hex_pointed_top_tiles_7: -1458833195
+      Hex_pointed_top_tiles_8: -975112573
+      Hex_pointed_top_tiles_9: -822502597
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
