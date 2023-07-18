@@ -22,7 +22,7 @@ namespace Winkeldief.Pathfinding
 
         public void Execute()
         {
-            astar.FindPath(start, end);
+            //astar.FindPath(start, end);
         }
     }
 }

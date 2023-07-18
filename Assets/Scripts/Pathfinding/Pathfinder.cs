@@ -10,12 +10,15 @@ namespace Winkeldief.Pathfinding
     public class Pathfinder : Singleton<Pathfinder>
     {
         [SerializeField] Tilemap map;
-        Astar astar;
+        //Astar astar;
 
         [Header("Pathfinding Config")]
         [Tooltip("Whether to allow diagonal movement in non-hex grids")] 
         public bool AllowDiagonals;
         private bool IsHexGrid;
+
+        NativeArray<AstarTile> grid;
+        int2 size, offset;
 
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
         public static Vector3 CellToWorld(Vector3Int cell) => instance.map.GetCellCenterWorld(cell);
@@ -23,19 +26,22 @@ namespace Winkeldief.Pathfinding
         /// <summary>Returns a path with each node from start to end </summary>
         public static Path FindPath(Vector3Int start, Vector3Int end)
         {
+            var tiles = new NativeArray<AstarTile>(instance.grid.Length, Allocator.TempJob);
+            instance.grid.CopyTo(tiles); 
+            Astar astarJob = new Astar(tiles, instance.size, instance.offset, new int2(43, -6), new int2(-4, 3));
+
             float startTime = Time.realtimeSinceStartup;
             int findPathJobCount = 10;
             NativeArray<JobHandle> jobHandleArray = new NativeArray<JobHandle>(findPathJobCount, Allocator.TempJob);
 
             for (int i = 0; i < findPathJobCount; i++)
             {
-                instance.ConstructGrid();
-                AstarJob findPathJob = new AstarJob(instance.astar, new int2(43, -6), new int2(-4, 3));
-                jobHandleArray[i] = findPathJob.Schedule();
+                jobHandleArray[i] = astarJob.Schedule();
             }
+
             JobHandle.CompleteAll(jobHandleArray);
             jobHandleArray.Dispose();
-
+            tiles.Dispose();
             Debug.Log("Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f));
             return new Path(null, Vector3.zero);//new Path(instance.astar.FindPath(new(start.x, start.y), new(end.x, end.y)), CellToWorld(Vector3Int.zero));
         }
@@ -58,8 +64,10 @@ namespace Winkeldief.Pathfinding
                     tiles[index] = tile;
                 }
             }
-
-            astar = new Astar(tiles, new(bounds.size.x, bounds.size.y), new(bounds.xMin, bounds.yMin));
+            grid = tiles;
+            size = new(bounds.size.x, bounds.size.y);
+            offset = new(bounds.xMin, bounds.yMin);
+            //astar = new Astar(tiles, new(bounds.size.x, bounds.size.y), new(bounds.xMin, bounds.yMin));
         }
 
         private int GetTileCost(Vector3Int cell)
@@ -81,7 +89,7 @@ namespace Winkeldief.Pathfinding
 
         protected override void OnDestroy()
         {
-            astar.Dispose();
+            grid.Dispose();
             base.OnDestroy();
         }
     }

@@ -6,7 +6,8 @@ using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
-    internal static class PathfinderUtility
+    [BurstCompile]
+    public static class PathfinderUtility
     {
         public const int DirectMoveCost = 10, DiagonalMoveCost = 14;
 
@@ -14,11 +15,11 @@ namespace Winkeldief.Pathfinding
         [BurstCompile]
         public static int CalculateSquareDistance(int x1, int y1, int x2, int y2, bool allowDiagonals)
         {
-            int dx = Mathf.Abs(x1 - x2);
-            int dy = Mathf.Abs(y1 - y2);
+            int dx = math.abs(x1 - x2);
+            int dy = math.abs(y1 - y2);
 
             if (allowDiagonals)
-                return Mathf.Min(dx, dy) * DiagonalMoveCost + Mathf.Abs(dx - dy) * DirectMoveCost;
+                return math.min(dx, dy) * DiagonalMoveCost + math.abs(dx - dy) * DirectMoveCost;
             else
                 return (dx + dy) * DirectMoveCost;
         }
@@ -28,13 +29,13 @@ namespace Winkeldief.Pathfinding
         {
             int dx = x2 - x1;
             int dy = y2 - y1;
-            int adx = Mathf.Abs(dx);
-            int ady = Mathf.Abs(dy);
+            int adx = math.abs(dx);
+            int ady = math.abs(dy);
 
             if ((dx < 0) ^ ((y1 & 1) == 1))
-                adx = Mathf.Max(0, adx - (ady + 1) / 2);
+                adx = math.max(0, adx - (ady + 1) / 2);
             else
-                adx = Mathf.Max(0, adx - (ady) / 2);
+                adx = math.max(0, adx - (ady) / 2);
             return (adx + ady) * DirectMoveCost;
         }
         #endregion CalculateDistance
@@ -56,7 +57,6 @@ namespace Winkeldief.Pathfinding
             }
         }
 
-        [BurstCompile]
         public static NativeArray<int2> GetSquareNeighboursArray(int2 offset, bool allowDiagonals)
         {
             NativeArray<int2> neighbours = new(allowDiagonals ? 8 : 4, Allocator.Temp);
@@ -86,7 +86,6 @@ namespace Winkeldief.Pathfinding
             yield return offset + (new int2(1, -1) * (isEven ? -1 : 1));
         }
 
-        [BurstCompile]
         public static NativeArray<int2> GetHexNeighboursArray(int2 offset)
         {
             NativeArray<int2> neighbours = new(6, Allocator.Temp);

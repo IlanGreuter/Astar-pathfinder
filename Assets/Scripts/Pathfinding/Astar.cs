@@ -1,15 +1,17 @@
 using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Winkeldief.Pathfinding
 {
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
-    public struct Astar
+    public struct Astar : IJob
     {
         [ReadOnly] readonly NativeArray<AstarTile> grid;
         [ReadOnly] readonly int2 gridSize, gridOffset;
+        [ReadOnly] readonly int2 start, end;
 
         private int GetIndex(int x, int y) => x + (y * gridSize.x);
         private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
@@ -19,22 +21,22 @@ namespace Winkeldief.Pathfinding
             cell.x >= 0 && cell.x < gridSize.x
                 && cell.y >= 0 && cell.y < gridSize.y;
 
-        public Astar(NativeArray<AstarTile> tiles, int2 size, int2 offset)
+        public Astar(NativeArray<AstarTile> tiles, int2 size, int2 offset, int2 start, int2 end)
         {
             grid = tiles;
             gridSize = size;
             gridOffset = offset;
+
+            this.start = start - offset;
+            this.end = end - offset;
         }
 
         //Returns a list of positions that form a path from start to end.
         //Will return null if no path was found
-        public NativeList<int2> FindPath(int2 start, int2 end)
+        public void Execute()
         {
-            start -= gridOffset;
-            end -= gridOffset;
-
             if (!IsValid(start) || !IsValid(end))
-                return new(Allocator.Temp);
+                return;// new(Allocator.Temp);
 
             //Copy persistent array into a temp array
             NativeArray<AstarTile> tiles = new(grid.Length, Allocator.Temp);
@@ -50,14 +52,14 @@ namespace Winkeldief.Pathfinding
             if (endTile.Cost < 0)
             {
                 tiles.Dispose();
-                return new(Allocator.Temp);
+                return;// new(Allocator.Temp);
             }
 
             NativeList<int> openTiles = new(Allocator.Temp);
             NativeList<int> closedTiles = new(Allocator.Temp);
             openTiles.Add(startTile.Index);
 
-            NativeArray<int2> neighbourOffsets = PathfinderUtility.GetSquareNeighboursArray(int2.zero, true);
+            NativeArray<int2> neighbourOffsets = GetNeighboursArray();
 
             //As long as we have tiles to search
             while (!openTiles.IsEmpty)
@@ -119,11 +121,12 @@ namespace Winkeldief.Pathfinding
             closedTiles.Dispose();
             neighbourOffsets.Dispose();
 
-            return path;
+            return;// path;
         }
 
+        [BurstCompile]
         private int GetLowestFIndex(NativeArray<AstarTile> tiles, NativeList<int> indices)
-        {
+        { //Extension: this can be made more efficient (heap?)
             AstarTile lowest = tiles[indices[0]];
             for (int i = 1; i < indices.Length; i++)
                 lowest = lowest.Compare(tiles[indices[i]]);
@@ -131,6 +134,7 @@ namespace Winkeldief.Pathfinding
         }
 
         /// <summary> Construct path once end has been found </summary>
+        [BurstCompile]
         private NativeList<int2> ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
         {
             NativeList<int2> path = new(Allocator.Temp);
@@ -144,6 +148,21 @@ namespace Winkeldief.Pathfinding
 
             if (includeStart) path.Add(current.ToInt2);
             return path;
+        }
+
+        [BurstCompile]
+        public NativeArray<int2> GetNeighboursArray()
+        {
+            NativeArray<int2> neighbours = new(8, Allocator.Temp);
+            neighbours[0] = new int2(-1, 0);
+            neighbours[1] = new int2(1, 0);
+            neighbours[2] = new int2(0, 1);
+            neighbours[3] = new int2(0, -1);
+            neighbours[4] = new int2(-1, 1);
+            neighbours[5] = new int2(1, 1);
+            neighbours[6] = new int2(-1, -1);
+            neighbours[7] = new int2(1, -1);
+            return neighbours;
         }
 
         /// <summary> Disposes of the internally stored grid, freeing up memory </summary>

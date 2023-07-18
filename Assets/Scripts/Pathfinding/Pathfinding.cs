@@ -17,6 +17,7 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
+using Winkeldief.Pathfinding;
 
 public class Pathfinding : MonoBehaviour {
 
@@ -207,14 +208,12 @@ public class Pathfinding : MonoBehaviour {
             return x + y * gridWidth;
         }
 
-        private int CalculateDistanceCost(int2 aPosition, int2 bPosition) {
-            int xDistance = math.abs(aPosition.x - bPosition.x);
-            int yDistance = math.abs(aPosition.y - bPosition.y);
-            int remaining = math.abs(xDistance - yDistance);
-            return MOVE_DIAGONAL_COST * math.min(xDistance, yDistance) + MOVE_STRAIGHT_COST * remaining;
+        private int CalculateDistanceCost(int2 aPos, int2 bPos)
+        { 
+            return PathfinderUtility.CalculateSquareDistance(aPos.x, aPos.y, bPos.x, bPos.y, true);
         }
 
-    
+
         private int GetLowestCostFNodeIndex(NativeList<int> openList, NativeArray<PathNode> pathNodeArray) {
             PathNode lowestCostPathNode = pathNodeArray[openList[0]];
             for (int i = 1; i < openList.Length; i++) {
