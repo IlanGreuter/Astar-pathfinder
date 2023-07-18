@@ -4,6 +4,8 @@ using Unity.Collections;
 using Winkeldief.Utilities;
 using Unity.Mathematics;
 using Unity.Jobs;
+using System;
+using UnityEditor.Build.Content;
 
 namespace Winkeldief.Pathfinding
 {

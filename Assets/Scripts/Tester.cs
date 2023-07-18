@@ -19,18 +19,27 @@ public class Tester : MonoBehaviour
     [ContextMenu("TimerTest")]
     private void TimerTest()
     {
-        float startTime = Time.realtimeSinceStartup;
-        
-        for (int i = 0; i < 1; i++)
-        {
+        //float startTime = Time.realtimeSinceStartup;
+        //int findPathJobCount = 10;
+        //NativeArray<JobHandle> jobHandleArray = new NativeArray<JobHandle>(findPathJobCount, Allocator.TempJob);
+
+        //for (int i = 0; i < findPathJobCount; i++)
+        //{
+            //AstarJob astarJob = new AstarJob(new(-20, 56), new(45, -95));
+            //jobHandleArray[i] = astarJob.Schedule();
             Pathfinder.FindPath(new(-4, 3), new(43, -6));
-        }
-        //Debug.Log("Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f));
+            //PathfinderUtility.CalculateSquareDistance(-19, 82, 16, -59, false);
+        //}
+
+        //JobHandle.CompleteAll(jobHandleArray);
+        //jobHandleArray.Dispose();
+
+        //Debug.Log("Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f) + "ms");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        if (true || Input.GetKeyDown(KeyCode.T))
             TimerTest();
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {

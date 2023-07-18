@@ -10,19 +10,20 @@ namespace Winkeldief.Pathfinding
     {
         [ReadOnly]
         public int2 start, end;
-        [ReadOnly]
-        public Astar astar;
 
-        public AstarJob(Astar astar, int2 start, int2 end)
+        public AstarJob(int2 start, int2 end)
         {
-            this.astar = astar;
             this.start = start;
             this.end = end;
         }
 
+        [BurstCompile]
         public void Execute()
         {
-            //astar.FindPath(start, end);
+            //AstarTile sT = new AstarTile(start.x, start.y, 0, 4);
+            //AstarTile eT = new AstarTile(end.x, end.y, 0, 4);
+            //for (int i = 0; i < 100000; i++)
+            //    sT.GetDistanceTo(end.x, end.y);
         }
     }
 }

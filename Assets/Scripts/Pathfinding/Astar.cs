@@ -9,7 +9,7 @@ namespace Winkeldief.Pathfinding
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
     public struct Astar : IJob
     {
-        [ReadOnly] readonly NativeArray<AstarTile> grid;
+        readonly NativeArray<AstarTile> grid;
         [ReadOnly] readonly int2 gridSize, gridOffset;
         [ReadOnly] readonly int2 start, end;
 
@@ -36,7 +36,7 @@ namespace Winkeldief.Pathfinding
         public void Execute()
         {
             if (!IsValid(start) || !IsValid(end))
-                return;// new(Allocator.Temp);
+                return;
 
             //Copy persistent array into a temp array
             NativeArray<AstarTile> tiles = new(grid.Length, Allocator.Temp);
@@ -52,7 +52,7 @@ namespace Winkeldief.Pathfinding
             if (endTile.Cost < 0)
             {
                 tiles.Dispose();
-                return;// new(Allocator.Temp);
+                return;
             }
 
             NativeList<int> openTiles = new(Allocator.Temp);
@@ -121,7 +121,8 @@ namespace Winkeldief.Pathfinding
             closedTiles.Dispose();
             neighbourOffsets.Dispose();
 
-            return;// path;
+            path.Dispose();
+            return;
         }
 
         [BurstCompile]

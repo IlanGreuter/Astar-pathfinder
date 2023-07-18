@@ -16,7 +16,7 @@ namespace Winkeldief.Pathfinding
         public int H; // Cost from this tile to end node
 
         public int Index, Previous;
-        [ReadOnly] readonly int _tileType;
+        public int _tileType;
 
         public AstarTile(int x, int y, int index, int tiletype)
         {
@@ -32,6 +32,7 @@ namespace Winkeldief.Pathfinding
         }
 
         /// <summary> Calculates the G and H costs </summary>
+        [BurstCompile]
         public void CalculateCost(AstarTile end)
         {
             //Extension: Add tile's cost as well
@@ -40,6 +41,7 @@ namespace Winkeldief.Pathfinding
         }
 
         /// <summary> Gets the distance from this tile to the coordinates </summary>
+        [BurstCompile]
         public int GetDistanceTo(int x, int y)
         {
             return _tileType == 6 ?
@@ -48,6 +50,7 @@ namespace Winkeldief.Pathfinding
         }
 
         /// <summary> Returns the tile that should be evaluated first </summary>
+        [BurstCompile]
         public AstarTile Compare(AstarTile other)
         {
             if (F != other.F)
