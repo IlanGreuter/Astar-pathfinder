@@ -17,7 +17,7 @@ namespace Winkeldief.Pathfinding
         public void SetPath(Path path)
         {
             path.CompressPath();
-            line.positionCount = path.Length;
+            line.positionCount = path.Count;
             line.SetPositions(path.ToWorld(Vector3.zero).ToArray());
         }
     }

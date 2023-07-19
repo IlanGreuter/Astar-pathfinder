@@ -9,9 +9,11 @@ namespace Winkeldief.Pathfinding
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
     public struct Astar : IJob
     {
-        readonly NativeArray<AstarTile> grid;
+        [ReadOnly] readonly NativeArray<AstarTile> grid;
         [ReadOnly] readonly int2 gridSize, gridOffset;
-        [ReadOnly] readonly int2 start, end;
+        [ReadOnly] int2 start, end;
+
+        [WriteOnly] NativeList<int2> pathOutput;
 
         private int GetIndex(int x, int y) => x + (y * gridSize.x);
         private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
@@ -21,14 +23,21 @@ namespace Winkeldief.Pathfinding
             cell.x >= 0 && cell.x < gridSize.x
                 && cell.y >= 0 && cell.y < gridSize.y;
 
-        public Astar(NativeArray<AstarTile> tiles, int2 size, int2 offset, int2 start, int2 end)
+        public Astar(NativeArray<AstarTile> tiles, int2 size, int2 offset, NativeList<int2> output)
         {
             grid = tiles;
             gridSize = size;
             gridOffset = offset;
+            pathOutput = output;
 
-            this.start = start - offset;
-            this.end = end - offset;
+            start = new();
+            end = new();
+        }
+
+        public void SetPath(int2 start, int2 end)
+        {
+            this.start = start - gridOffset;
+            this.end = end - gridOffset;
         }
 
         //Returns a list of positions that form a path from start to end.
@@ -111,9 +120,11 @@ namespace Winkeldief.Pathfinding
             }
 
             endTile = tiles[endTile.Index];
-            NativeList<int2> path = (endTile.Previous != -1) ?
-                ConstructPath(tiles, endTile, true) :
-                new(Allocator.Temp);
+
+            if (endTile.Previous != -1)
+                ConstructPath(tiles, endTile, true);
+            //pathOutput = (endTile.Previous != -1) ?// :
+            //new(Allocator.Temp);
 
             //Dispose
             tiles.Dispose();
@@ -121,7 +132,6 @@ namespace Winkeldief.Pathfinding
             closedTiles.Dispose();
             neighbourOffsets.Dispose();
 
-            path.Dispose();
             return;
         }
 
@@ -136,19 +146,19 @@ namespace Winkeldief.Pathfinding
 
         /// <summary> Construct path once end has been found </summary>
         [BurstCompile]
-        private NativeList<int2> ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
+        private void ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
         {
-            NativeList<int2> path = new(Allocator.Temp);
+            //NativeList<int2> path = new(Allocator.Temp);
             AstarTile current = end;
 
             while (current.Previous > -1)
             {
-                path.Add(current.ToInt2);
+                pathOutput.Add(current.ToInt2);
                 current = tiles[current.Previous];
             }
 
-            if (includeStart) path.Add(current.ToInt2);
-            return path;
+            if (includeStart) pathOutput.Add(current.ToInt2);
+            return;
         }
 
         [BurstCompile]
@@ -164,12 +174,6 @@ namespace Winkeldief.Pathfinding
             neighbours[6] = new int2(-1, -1);
             neighbours[7] = new int2(1, -1);
             return neighbours;
-        }
-
-        /// <summary> Disposes of the internally stored grid, freeing up memory </summary>
-        public void Dispose()
-        {
-            grid.Dispose();
         }
     }
 }

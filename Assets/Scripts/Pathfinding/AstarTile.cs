@@ -8,22 +8,22 @@ namespace Winkeldief.Pathfinding
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
     public struct AstarTile
     {
-        public int X, Y;
+        public readonly int X, Y;
         public int Cost; //This node's cost. -1 means unwalkable
 
         public int F => G + H;
         public int G; // Cost from this tile to start node
         public int H; // Cost from this tile to end node
 
-        public int Index, Previous;
-        public int _tileType;
+        public readonly int Index, TileType;
+        public int Previous;
 
         public AstarTile(int x, int y, int index, int tiletype)
         {
             X = x;
             Y = y;
             Index = index;
-            _tileType = tiletype;
+            TileType = tiletype;
 
             G = int.MaxValue;
             H = 0;
@@ -44,9 +44,9 @@ namespace Winkeldief.Pathfinding
         [BurstCompile]
         public int GetDistanceTo(int x, int y)
         {
-            return _tileType == 6 ?
+            return TileType == 6 ?
                 PathfinderUtility.CalculateHexDistance(X, Y, x, y) :
-                PathfinderUtility.CalculateSquareDistance(X, Y, x, y, _tileType == 8);
+                PathfinderUtility.CalculateSquareDistance(X, Y, x, y, TileType == 8);
         }
 
         /// <summary> Returns the tile that should be evaluated first </summary>
@@ -67,10 +67,10 @@ namespace Winkeldief.Pathfinding
         /// </param>
         public int GetNeighbourFlags(int yPosition)
         {
-            if (_tileType == 6)
+            if (TileType == 6)
                 return (yPosition & 1) == 0 ? 95 : 175; // 0101 1111 : 1010 1111
             else
-                return (_tileType == 8) ? 255 : 15; // 1111 1111 : 0000 1111
+                return (TileType == 8) ? 255 : 15; // 1111 1111 : 0000 1111
         }
 
         /// <summary> Returns a Vector3Int with this tile's coordinates in the tilemap </summary>
