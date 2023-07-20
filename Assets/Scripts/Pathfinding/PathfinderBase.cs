@@ -93,7 +93,7 @@ namespace Winkeldief.Pathfinding
                 for (int y = bounds.yMin, j = 0; y < bounds.yMax; y++, j++)
                 {
                     int index = i + (j * gridSize.x);
-                    AstarTile tile = new(x, y, index, tileType);
+                    AstarTile tile = new(new int2(x,y), index, tileType);
                     tile.Cost = GetTileCost(tile.ToVec3Int);
                     grid[index] = tile;
                 }

@@ -54,7 +54,7 @@ namespace Winkeldief.Pathfinding
             AstarTile startTile = tiles[GetIndex(start)];
             AstarTile endTile = tiles[GetIndex(end)];
             startTile.G = 0;
-            startTile.CalculateCost(endTile);
+            startTile.CalculateHCost(endTile);
             tiles[startTile.Index] = startTile;
 
             //Return if endTile is not walkable
@@ -96,13 +96,13 @@ namespace Winkeldief.Pathfinding
                     if (nTile.Cost < 0 || nTile.HeapIndex < 0)
                         continue;
 
-                    int tempG = currentTile.G + currentTile.GetDistanceTo(nTile.X, nTile.Y);
+                    int tempG = currentTile.G + currentTile.GetDistanceTo(nTile.Pos);
 
                     //If not yet searched or better path was found
                     if (tempG < nTile.G)
                     {
                         nTile.G = tempG;
-                        nTile.CalculateCost(endTile);
+                        nTile.CalculateHCost(endTile);
                         nTile.Previous = currentTile.Index;
                         tiles[nTile.Index] = nTile;
 
