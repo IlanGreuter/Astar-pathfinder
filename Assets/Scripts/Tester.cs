@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Winkeldief.Pathfinding;
@@ -25,9 +26,14 @@ public class Tester : MonoBehaviour
 
         //for (int i = 0; i < findPathJobCount; i++)
         //{
-            //AstarJob astarJob = new AstarJob(new(-20, 56), new(45, -95));
-            //jobHandleArray[i] = astarJob.Schedule();
-            Pathfinder.FindPath(new(-4, 3), new(43, -6));
+        //AstarJob astarJob = new AstarJob(new(-20, 56), new(45, -95));
+        //jobHandleArray[i] = astarJob.Schedule();
+        var list = new List<(Vector3Int, Vector3Int)>
+        {
+            (new(-4, 3), new(43, -6)),
+            (new(43, -6), new(-4, 3))
+        };
+        Pathfinder.FindMultiplePaths(list);
             //PathfinderUtility.CalculateSquareDistance(-19, 82, 16, -59, false);
         //}
 

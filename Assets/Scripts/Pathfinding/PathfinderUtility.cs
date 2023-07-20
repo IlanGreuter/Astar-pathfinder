@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
@@ -100,5 +99,9 @@ namespace Winkeldief.Pathfinding
             return neighbours;
         }
         #endregion GetNeighbours
+
+        #region Extensions
+        public static int2 ToInt2(this UnityEngine.Vector3Int vec) => new int2(vec.x, vec.y);
+        #endregion Extensions
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Winkeldief.Utilities
 {
-    public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
+    public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
     {
         public static T instance { get; private set; }
         

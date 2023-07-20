@@ -14,7 +14,7 @@ namespace Winkeldief.Pathfinding
         public int G; // Cost from this tile to start node
         public int H; // Cost from this tile to end node
 
-        public readonly int Index, TileType;
+        public readonly int Index, TileType; //TileType should be 6 for hex, 4 for square and 8 for square with diagonal
         public int Previous;
         public int HeapIndex { get; set; }
 
