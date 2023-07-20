@@ -16,6 +16,8 @@ namespace Winkeldief.Pathfinding
         [Tooltip("The base tilemap that the pathfinding grid will be based off")]
         public Tilemap map;
 
+        [SerializeField] TileType tileType = TileType.Square;
+
         [Header("Pathfinding Config")]
         [SerializeField, Tooltip("Whether to allow diagonal movement in non-hex grids")]
         bool allowDiagonals;
@@ -78,9 +80,6 @@ namespace Winkeldief.Pathfinding
         /// <summary> Turns the tilemap into a grid that can be used for the pathfinding algorithm </summary>
         protected virtual void ConstructGrid()
         {
-            isHexGrid = map.cellLayout == GridLayout.CellLayout.Hexagon;
-            int tileType = isHexGrid ? 6 : allowDiagonals ? 8 : 4;
-
             map.CompressBounds();
             var bounds = map.cellBounds;
             gridSize = new(bounds.size.x, bounds.size.y);
@@ -93,7 +92,7 @@ namespace Winkeldief.Pathfinding
                 for (int y = bounds.yMin, j = 0; y < bounds.yMax; y++, j++)
                 {
                     int index = i + (j * gridSize.x);
-                    AstarTile tile = new(new int2(x,y), index, tileType);
+                    AstarTile tile = new(new int2(x,y), index, (int)tileType);
                     tile.Cost = GetTileCost(tile.ToVec3Int);
                     grid[index] = tile;
                 }
@@ -127,6 +126,13 @@ namespace Winkeldief.Pathfinding
             if (grid.IsCreated)
                 grid.Dispose();
             base.OnDestroy();
+        }
+
+        public enum TileType
+        {
+            Square = 4,
+            SquareDiagonal = 8,
+            Hex = 6
         }
     }
 }
