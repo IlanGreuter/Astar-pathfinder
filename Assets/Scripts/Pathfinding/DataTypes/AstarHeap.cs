@@ -3,10 +3,11 @@ using Unity.Collections;
 
 namespace Winkeldief.Pathfinding
 {
-    [BurstCompile]
-    public struct Heap<T> where T : struct, IHeapItem<T>
+    [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
+    public struct AstarHeap
     {
-        NativeArray<T> heap;
+        NativeArray<AstarTile> grid;
+        NativeArray<int> heap;
         int currentCount;
 
         public int Count => currentCount;
@@ -16,75 +17,77 @@ namespace Winkeldief.Pathfinding
         [BurstCompile] static int LeftChildIndex(int index) => (index * 2) + 1;
         [BurstCompile] static int RightChildIndex(int index) => (index * 2) + 2;
 
-        public Heap(int maxHeapSize)
+        public AstarHeap(int maxHeapSize, NativeArray<AstarTile> grid)
         {
             heap = new(maxHeapSize, Allocator.Temp);
             currentCount = 0;
+            this.grid = grid;
         }
 
         [BurstCompile]
-        public void Add(T item)
+        public void Add(AstarTile item)
         {
             item.HeapIndex = currentCount;
-            heap[currentCount] = item;
+            heap[currentCount] = item.Index;
+            grid[item.Index] = item;
             SortUp(item);
             currentCount++;
         }
 
         [BurstCompile]
-        public T RemoveFirst()
+        public AstarTile RemoveFirst()
         {
-            T firstItem = heap[0];
+            AstarTile firstItem = grid[heap[0]];
             firstItem.HeapIndex = -1;
+            grid[firstItem.Index] = firstItem;
             currentCount--;
 
-            T temp = heap[currentCount];
+            AstarTile temp = grid[heap[currentCount]];
             temp.HeapIndex = 0;
-            heap[0] = temp;
+            heap[0] = temp.Index;
+            grid[temp.Index] = temp;
 
-            SortDown(heap[0]);
+            SortDown(temp);
             return firstItem;
         }
 
         [BurstCompile]
-        public void UpdateItem(T item)
+        public void UpdateItem(AstarTile item)
         {
-            //Error Here
-            //Change Heap to use grid & work with indexes?
-            //Heap Updates Indexes?
-            heap[item.HeapIndex] = item;
             SortUp(item);
         }
 
         [BurstCompile]
-        private void Swap(T itemA, T itemB)
+        private void Swap(AstarTile itemA, AstarTile itemB)
         {
             int temp = itemA.HeapIndex;
             itemA.HeapIndex = itemB.HeapIndex;
             itemB.HeapIndex = temp;
 
-            heap[itemA.HeapIndex] = itemA;
-            heap[itemB.HeapIndex] = itemB;
+            heap[itemA.HeapIndex] = itemA.Index;
+            heap[itemB.HeapIndex] = itemB.Index;
+            grid[itemA.Index] = itemA;
+            grid[itemB.Index] = itemB;
         }
 
         [BurstCompile]
-        private void SortUp(T item)
+        private void SortUp(AstarTile item)
         {
-            int parentIndex = ParentIndex(item.HeapIndex);
             while (true)
             {
-                T parentItem = heap[parentIndex];
+                AstarTile parentItem = grid[heap[ParentIndex(item.HeapIndex)]];
 
                 if (item.CompareTo(parentItem) > 0)
+                {
                     Swap(item, parentItem);
+                    item.HeapIndex = parentItem.HeapIndex;
+                }
                 else break;
-
-                parentIndex = ParentIndex(item.HeapIndex);
             }
         }
 
         [BurstCompile]
-        private void SortDown(T item)
+        private void SortDown(AstarTile item)
         {
             while (true)
             {
@@ -95,11 +98,15 @@ namespace Winkeldief.Pathfinding
                 {
                     int swapIndex = childIndexL;
 
-                    if (childIndexR < currentCount && heap[childIndexR].CompareTo(heap[childIndexL]) > 0)
+                    if (childIndexR < currentCount && grid[heap[childIndexR]].CompareTo(grid[heap[childIndexL]]) > 0)
                         swapIndex = childIndexR;
 
-                    if (item.CompareTo(heap[swapIndex]) < 0)
-                        Swap(item, heap[swapIndex]);
+                    AstarTile swap = grid[heap[swapIndex]];
+                    if (swap.CompareTo(item) > 0)
+                    {
+                        Swap(item, swap);
+                        item.HeapIndex = swapIndex;
+                    }
                     else return;
                 }
                 else return;
@@ -107,9 +114,9 @@ namespace Winkeldief.Pathfinding
         }
 
         [BurstCompile]
-        public bool Contains(T item)
+        public bool Contains(AstarTile item)
         {
-            return item.Equals(heap[item.HeapIndex]);
+            return item.Index == heap[item.HeapIndex];
         }
 
         [BurstCompile]

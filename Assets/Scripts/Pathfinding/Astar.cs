@@ -1,4 +1,3 @@
-using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -65,7 +64,7 @@ namespace Winkeldief.Pathfinding
                 return;
             }
 
-            Heap<AstarTile> openTiles = new(tiles.Length);
+            AstarHeap openTiles = new(tiles.Length, tiles);
             openTiles.Add(startTile);
 
             NativeArray<int2> neighbourOffsets = GetNeighboursArray();
@@ -75,7 +74,6 @@ namespace Winkeldief.Pathfinding
             {
                 //Take the best tile from the heap and add to closed
                 AstarTile currentTile = openTiles.RemoveFirst();
-                tiles[currentTile.Index] = currentTile;
 
                 //If tile is end, stop searching
                 if (currentTile.Index == endTile.Index)
@@ -110,14 +108,13 @@ namespace Winkeldief.Pathfinding
 
                         if (!openTiles.Contains(nTile))
                             openTiles.Add(nTile);
-                        //else
-                            //openTiles.UpdateItem(nTile);
+                        else
+                            openTiles.UpdateItem(nTile);
                     }
                 }
             }
 
             endTile = tiles[endTile.Index];
-
             if (endTile.Previous != -1)
                 ConstructPath(tiles, endTile, true);
 

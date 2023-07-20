@@ -32,7 +32,6 @@ namespace Winkeldief.Pathfinding
             astarJob.SetPath(new int2(start.x, start.y), new int2(end.x, end.y));
 
             astarJob.Schedule().Complete();
-
             Path path = new(result, CellToWorld(Vector3Int.zero));
             return path;
         }
@@ -48,7 +47,7 @@ namespace Winkeldief.Pathfinding
             NativeArray<JobHandle> jobHandleArray = new(numPaths, Allocator.TempJob);
             for (int i = 0; i < numPaths; i++)
             {
-                //results[i] = new(Allocator.TempJob);
+                results[i] = new(Allocator.TempJob);
                 Astar astarJob = new Astar(instance.grid, instance.size, instance.offset, results[i]);
 
                 (Vector3Int start, Vector3Int end) = pathStartEndPoints[i];

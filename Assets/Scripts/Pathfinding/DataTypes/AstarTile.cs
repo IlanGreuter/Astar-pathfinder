@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Winkeldief.Pathfinding
 {
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
-    public struct AstarTile : IHeapItem<AstarTile>
+    public struct AstarTile
     {
         public readonly int X, Y;
         public int Cost; //This node's cost. -1 means unwalkable
