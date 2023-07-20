@@ -15,10 +15,11 @@ namespace Winkeldief.Pathfinding
 
         [WriteOnly] NativeList<int2> pathOutput;
 
-        private int GetIndex(int x, int y) => x + (y * gridSize.x);
-        private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
+        [BurstCompile] private int GetIndex(int x, int y) => x + (y * gridSize.x);
+        [BurstCompile] private int GetIndex(int2 pos) => GetIndex(pos.x, pos.y);
 
         /// <summary> Check if tile is within the bounds of the grid </summary>
+        [BurstCompile]
         private bool IsValid(int2 cell) =>
             cell.x >= 0 && cell.x < gridSize.x
                 && cell.y >= 0 && cell.y < gridSize.y;
@@ -53,8 +54,8 @@ namespace Winkeldief.Pathfinding
 
             AstarTile startTile = tiles[GetIndex(start)];
             AstarTile endTile = tiles[GetIndex(end)];
-            startTile.CalculateCost(endTile);
             startTile.G = 0;
+            startTile.CalculateCost(endTile);
             tiles[startTile.Index] = startTile;
 
             //Return if endTile is not walkable
@@ -64,28 +65,23 @@ namespace Winkeldief.Pathfinding
                 return;
             }
 
-            NativeList<int> openTiles = new(Allocator.Temp);
-            NativeList<int> closedTiles = new(Allocator.Temp);
-            openTiles.Add(startTile.Index);
+            Heap<AstarTile> openTiles = new(tiles.Length);
+            openTiles.Add(startTile);
 
             NativeArray<int2> neighbourOffsets = GetNeighboursArray();
 
             //As long as we have tiles to search
             while (!openTiles.IsEmpty)
             {
-                //Find best tile
-                int currentIndex = GetLowestFIndex(tiles, openTiles); //Extension: This is very slow
+                //Take the best tile from the heap and add to closed
+                AstarTile currentTile = openTiles.RemoveFirst();
+                tiles[currentTile.Index] = currentTile;
 
                 //If tile is end, stop searching
-                if (currentIndex == endTile.Index)
+                if (currentTile.Index == endTile.Index)
                     break;
 
-                //Remove current from open and add to closed tiles
-                openTiles.RemoveAtSwapBack(openTiles.IndexOf(currentIndex));
-                closedTiles.Add(currentIndex);
-
-                AstarTile currentTile = tiles[currentIndex];
-                int adjecentFlags = currentTile.GetNeighbourFlags(currentTile.Y);
+                int adjecentFlags = currentTile.GetNeighbourFlags();
 
                 //Foreach neighbour
                 for (int i = 0; i < neighbourOffsets.Length; i++)
@@ -96,11 +92,10 @@ namespace Winkeldief.Pathfinding
                     if ((adjecentFlags & (1 << i)) == 0 || !IsValid(neighbour))
                         continue;
 
-                    int nIndex = GetIndex(neighbour);
-                    AstarTile nTile = tiles[nIndex];
+                    AstarTile nTile = tiles[GetIndex(neighbour)];
 
                     //Skip if already searched or if not walkable
-                    if (nTile.Cost < 0 || closedTiles.Contains(nIndex))
+                    if (nTile.Cost < 0 || nTile.HeapIndex < 0)
                         continue;
 
                     int tempG = currentTile.G + currentTile.GetDistanceTo(nTile.X, nTile.Y);
@@ -110,11 +105,13 @@ namespace Winkeldief.Pathfinding
                     {
                         nTile.G = tempG;
                         nTile.CalculateCost(endTile);
-                        nTile.Previous = currentIndex;
-                        tiles[nIndex] = nTile;
+                        nTile.Previous = currentTile.Index;
+                        tiles[nTile.Index] = nTile;
 
-                        if (!openTiles.Contains(nIndex))
-                            openTiles.Add(nIndex);
+                        if (!openTiles.Contains(nTile))
+                            openTiles.Add(nTile);
+                        //else
+                            //openTiles.UpdateItem(nTile);
                     }
                 }
             }
@@ -123,32 +120,19 @@ namespace Winkeldief.Pathfinding
 
             if (endTile.Previous != -1)
                 ConstructPath(tiles, endTile, true);
-            //pathOutput = (endTile.Previous != -1) ?// :
-            //new(Allocator.Temp);
 
             //Dispose
             tiles.Dispose();
             openTiles.Dispose();
-            closedTiles.Dispose();
             neighbourOffsets.Dispose();
 
             return;
-        }
-
-        [BurstCompile]
-        private int GetLowestFIndex(NativeArray<AstarTile> tiles, NativeList<int> indices)
-        { //Extension: this can be made more efficient (heap?)
-            AstarTile lowest = tiles[indices[0]];
-            for (int i = 1; i < indices.Length; i++)
-                lowest = lowest.Compare(tiles[indices[i]]);
-            return lowest.Index;
         }
 
         /// <summary> Construct path once end has been found </summary>
         [BurstCompile]
         private void ConstructPath(NativeArray<AstarTile> tiles, AstarTile end, bool includeStart)
         {
-            //NativeList<int2> path = new(Allocator.Temp);
             AstarTile current = end;
 
             while (current.Previous > -1)
@@ -158,7 +142,6 @@ namespace Winkeldief.Pathfinding
             }
 
             if (includeStart) pathOutput.Add(current.ToInt2);
-            return;
         }
 
         [BurstCompile]

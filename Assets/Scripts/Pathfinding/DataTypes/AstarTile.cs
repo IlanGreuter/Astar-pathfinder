@@ -1,12 +1,11 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
-    public struct AstarTile
+    public struct AstarTile : IHeapItem<AstarTile>
     {
         public readonly int X, Y;
         public int Cost; //This node's cost. -1 means unwalkable
@@ -17,6 +16,7 @@ namespace Winkeldief.Pathfinding
 
         public readonly int Index, TileType;
         public int Previous;
+        public int HeapIndex { get; set; }
 
         public AstarTile(int x, int y, int index, int tiletype)
         {
@@ -29,6 +29,7 @@ namespace Winkeldief.Pathfinding
             H = 0;
             Cost = 1;
             Previous = -1;
+            HeapIndex = 0;
         }
 
         /// <summary> Calculates the G and H costs </summary>
@@ -51,12 +52,17 @@ namespace Winkeldief.Pathfinding
 
         /// <summary> Returns the tile that should be evaluated first </summary>
         [BurstCompile]
-        public AstarTile Compare(AstarTile other)
+        public int CompareTo(AstarTile other)
         {
-            if (F != other.F)
-                return F < other.F ? this : other;
-            else
-                return H <= other.H ? this : other;
+            int compare = F.CompareTo(other.F);
+            return -(compare != 0 ? compare : H.CompareTo(other.H));
+        }
+
+        /// <summary> Checks if the indexes of the two match </summary>
+        [BurstCompile]
+        public bool Equals(AstarTile other)
+        {
+            return Index == other.Index;
         }
 
         /// <summary>
@@ -65,10 +71,11 @@ namespace Winkeldief.Pathfinding
         /// <param name="yPosition"> Only used for hex grids. 
         /// Neighbours coordinates may differ if the y position of the tile is even or odd.
         /// </param>
-        public int GetNeighbourFlags(int yPosition)
+        [BurstCompile]
+        public int GetNeighbourFlags()
         {
             if (TileType == 6)
-                return (yPosition & 1) == 0 ? 95 : 175; // 0101 1111 : 1010 1111
+                return (Y & 1) == 0 ? 95 : 175; // 0101 1111 : 1010 1111
             else
                 return (TileType == 8) ? 255 : 15; // 1111 1111 : 0000 1111
         }

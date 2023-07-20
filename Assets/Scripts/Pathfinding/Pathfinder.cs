@@ -10,7 +10,7 @@ namespace Winkeldief.Pathfinding
 {
     public class Pathfinder : Singleton<Pathfinder>
     {
-        NativeArray<AstarTile> grid;
+        public NativeArray<AstarTile> grid;
         int2 size, offset;
 
         [SerializeField] Tilemap map;
