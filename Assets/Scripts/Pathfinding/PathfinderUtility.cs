@@ -23,10 +23,6 @@ namespace Winkeldief.Pathfinding
                 return (dx + dy) * DirectMoveCost;
         }
 
-        [BurstCompile] 
-        public static int CalculateSquareDistance(int2 a, int2 b, bool allowDiagonals) => 
-            CalculateSquareDistance(a.x, a.y, b.x, b.y, allowDiagonals);
-
         [BurstCompile]
         public static int CalculateHexDistance(int x1, int y1, int x2, int y2)
         {
@@ -41,10 +37,6 @@ namespace Winkeldief.Pathfinding
                 adx = math.max(0, adx - (ady) / 2);
             return (adx + ady) * DirectMoveCost;
         }
-
-        [BurstCompile] 
-        public static int CalculateHexDistance(int2 a, int2 b) =>
-            CalculateHexDistance(a.x, a.y, b.x, b.y);
         #endregion CalculateDistance
 
         #region GetNeighbours

@@ -43,8 +43,8 @@ namespace Winkeldief.Pathfinding
         public int GetDistanceTo(int2 target)
         {
             return TileType == 6 ?
-                PathfinderUtility.CalculateHexDistance(Pos, target) :
-                PathfinderUtility.CalculateSquareDistance(Pos, target, TileType == 8);
+                PathfinderUtility.CalculateHexDistance(Pos.x, Pos.y, target.x, target.y) :
+                PathfinderUtility.CalculateSquareDistance(Pos.x, Pos.y, target.x, target.y, TileType == 8);
         }
 
         /// <summary> Returns the tile that should be evaluated first </summary>
