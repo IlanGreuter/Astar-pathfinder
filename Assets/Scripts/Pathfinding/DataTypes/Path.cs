@@ -109,5 +109,8 @@ namespace Winkeldief.Pathfinding
             offset += worldOffset;
             return path.Select(v => Pathfinder.CellToWorld(v)).ToList();
         }
+
+        /// <summary> Returns an empty path with no nodes and no offset </summary>
+        public static Path EmptyPath => new Path(new(), Vector3Int.zero);
     }
 }

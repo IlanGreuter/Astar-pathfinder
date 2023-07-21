@@ -11,6 +11,7 @@ namespace Winkeldief.Pathfinding
         [ReadOnly] readonly NativeArray<AstarTile> grid;
         [ReadOnly] readonly int2 gridSize, gridOffset;
         [ReadOnly] int2 start, end;
+        [ReadOnly] int maxSearchDistance;
 
         [WriteOnly] NativeList<int2> pathOutput;
 
@@ -32,12 +33,14 @@ namespace Winkeldief.Pathfinding
 
             start = new();
             end = new();
+            maxSearchDistance = int.MaxValue;
         }
 
-        public void SetPath(int2 start, int2 end)
+        public void SetPath(int2 start, int2 end, int maxRange = int.MaxValue)
         {
             this.start = start - gridOffset;
             this.end = end - gridOffset;
+            maxSearchDistance = maxRange;
         }
 
         //Returns a list of positions that form a path from start to end.
@@ -99,7 +102,7 @@ namespace Winkeldief.Pathfinding
                     int tempG = currentTile.G + currentTile.GetDistanceTo(nTile.Pos);
 
                     //If not yet searched or better path was found
-                    if (tempG < nTile.G)
+                    if (tempG < nTile.G && tempG <= maxSearchDistance)
                     {
                         nTile.G = tempG;
                         nTile.CalculateHCost(endTile);
@@ -115,7 +118,7 @@ namespace Winkeldief.Pathfinding
             }
 
             endTile = tiles[endTile.Index];
-            if (endTile.Previous != -1)
+            if (endTile.Previous != -1) //Extension: return closed list/ frontier rather than path
                 ConstructPath(tiles, endTile, true);
 
             //Dispose

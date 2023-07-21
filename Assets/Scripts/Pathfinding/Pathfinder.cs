@@ -7,7 +7,7 @@ namespace Winkeldief.Pathfinding
         public override int GetTileCost(Vector3Int cell)
         {
             //Simply makes a tile unwalkable if it exist
-            return map.HasTile(cell) ? -1 : 1;
+            return map.HasTile(cell) ? -1 : 0;
         }
     }
 }

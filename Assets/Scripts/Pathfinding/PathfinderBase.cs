@@ -16,12 +16,10 @@ namespace Winkeldief.Pathfinding
         [Tooltip("The base tilemap that the pathfinding grid will be based off")]
         public Tilemap map;
 
-        [SerializeField] TileType tileType = TileType.Square;
-
         [Header("Pathfinding Config")]
-        [SerializeField, Tooltip("Whether to allow diagonal movement in non-hex grids")]
-        bool allowDiagonals;
-        bool isHexGrid;
+        [SerializeField] TileType tileType = TileType.Square;
+        [Tooltip("The maximum distance to search for a path. -1 to disable. For reference, the base distance between adjecent tiles is 10 (or 14 for diagonal)")]
+        public int maxSearchDistance = -1;
 
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
         public static Vector3 CellToWorld(Vector3Int cell) => instance.map.GetCellCenterWorld(cell);
@@ -30,7 +28,7 @@ namespace Winkeldief.Pathfinding
         private Astar GetAstarJob(int2 start, int2 end, NativeList<int2> output)
         {
             Astar astarJob = new(grid, gridSize, gridOffset, output);
-            astarJob.SetPath(start, end);
+            astarJob.SetPath(start, end, maxSearchDistance > 0 ? maxSearchDistance : int.MaxValue);
             return astarJob;
         }
 
@@ -74,6 +72,21 @@ namespace Winkeldief.Pathfinding
 
             results.Dispose();
             return paths;
+        }
+
+        /// <summary> Returns a path that goes through each point in the list </summary>
+        public static Path FindPathAlongRoute(List<Vector3Int> route)
+        {
+            List<(Vector3Int, Vector3Int)> startEnds = new();
+            for (int i = 0; i < route.Count - 1; i++)
+                startEnds.Add((route[i], route[i+1]));
+
+            List<Path> segments = FindMultiplePaths(startEnds);
+            Path path = segments[0];
+            for (int i = 1; i < segments.Count; i++)
+                path.AppendPath(segments[i]);
+
+            return path;
         }
         #endregion FindPath
 
