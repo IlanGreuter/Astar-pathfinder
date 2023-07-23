@@ -2,7 +2,7 @@ using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Winkeldief.Pathfinding
+namespace Winkeldief.Pathfinding.AStar
 {
     [BurstCompile(OptimizeFor = OptimizeFor.Performance)]
     public struct AstarTile
@@ -43,8 +43,8 @@ namespace Winkeldief.Pathfinding
         public int GetDistanceTo(int2 target)
         {
             return TileType == 6 ?
-                PathfinderUtility.CalculateHexDistance(Pos.x, Pos.y, target.x, target.y) :
-                PathfinderUtility.CalculateSquareDistance(Pos.x, Pos.y, target.x, target.y, TileType == 8);
+                PathfinderUtility.CalculateHexCost(Pos.x, Pos.y, target.x, target.y) :
+                PathfinderUtility.CalculateSquareCost(Pos.x, Pos.y, target.x, target.y, TileType == 8);
         }
 
         /// <summary> Returns the tile that should be evaluated first </summary>

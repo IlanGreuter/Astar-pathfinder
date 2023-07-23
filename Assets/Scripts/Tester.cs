@@ -7,11 +7,13 @@ using UnityEngine.Tilemaps;
 using Winkeldief.Pathfinding;
 public class Tester : MonoBehaviour
 {
-    [SerializeField] Tilemap map;
+    [SerializeField] Tilemap map, floor;
     bool a;
     Vector3Int c, last;
     [SerializeField] PathDrawer drawer;
     Camera cam;
+    string showTime;
+    [SerializeField] int range;
     private void Awake()
     {
         cam = Camera.main;
@@ -28,25 +30,33 @@ public class Tester : MonoBehaviour
         //{
         //AstarJob astarJob = new AstarJob(new(-20, 56), new(45, -95));
         //jobHandleArray[i] = astarJob.Schedule();
-        var list = new List<(Vector3Int, Vector3Int)>
-        {
-            (new(-4, 3), new(43, -6)),
-            (new(43, -6), new(-4, 3))
-        };
-        Pathfinder.FindMultiplePaths(list);
-            //PathfinderUtility.CalculateSquareDistance(-19, 82, 16, -59, false);
+        //var list = new List<(Vector3Int, Vector3Int)>
+        //{
+            //(new(-4, 3), new(43, -6)),
+            //(new(43, -6), new(-4, 3))
+        //};
+        //Pathfinder.FindMultiplePaths(list);
+        Pathfinder.FindPath(new(-4, 3), new(43, -6));
+        //PathfinderUtility.CalculateSquareDistance(-19, 82, 16, -59, false);
         //}
 
         //JobHandle.CompleteAll(jobHandleArray);
         //jobHandleArray.Dispose();
-
-        Debug.Log("Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f) + "ms");
+        showTime = "Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f) + "ms";
     }
 
     private void Update()
     {
         if (false || Input.GetKeyDown(KeyCode.T))
             TimerTest();
+        if (false || Input.GetKeyDown(KeyCode.Y))
+        {
+            float startTime = Time.realtimeSinceStartup;
+            var p = Pathfinder.FindAllReachableTiles(HoveredTile(), range);
+            foreach (Vector3Int t in p)
+                floor.SetColor(t, Color.yellow);
+            showTime = "Time: " + ((Time.realtimeSinceStartup - startTime) * 1000f) + "ms";
+        }
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             c = HoveredTile();
@@ -70,6 +80,7 @@ public class Tester : MonoBehaviour
     {
         var style = new GUIStyle() { fontSize = 32, normal = new GUIStyleState() { textColor = Color.white } };
         GUI.Label(new Rect(20, Screen.height - 60, 100, 100), HoveredTile().ToString(), style);
+        GUI.Label(new Rect (20, Screen.height - 100, 100, 100), showTime, style);
     }
 
 }

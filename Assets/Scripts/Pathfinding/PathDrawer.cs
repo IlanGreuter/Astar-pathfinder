@@ -6,6 +6,8 @@ namespace Winkeldief.Pathfinding
     public class PathDrawer : MonoBehaviour
     {
         LineRenderer line;
+        [SerializeField, Tooltip("Simplifies the path by removing all poins that are not corners")] 
+        bool compressPath = true;
 
         private void Awake()
         {
@@ -16,7 +18,7 @@ namespace Winkeldief.Pathfinding
         /// <summary> Set the path to be drawn </summary>
         public void SetPath(Path path)
         {
-            path.CompressPath();
+            if (compressPath) path.CompressPath();
             line.positionCount = path.Count;
             line.SetPositions(path.ToWorld(Vector3.zero).ToArray());
         }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Winkeldief.Pathfinding
 {
@@ -11,8 +12,9 @@ namespace Winkeldief.Pathfinding
         public const int DirectMoveCost = 10, DiagonalMoveCost = 14;
 
         #region CalculateDistance
+        /// <summary> Calculates the cost between two tiles in a hexagonal grid </summary
         [BurstCompile]
-        public static int CalculateSquareDistance(int x1, int y1, int x2, int y2, bool allowDiagonals)
+        public static int CalculateSquareCost(int x1, int y1, int x2, int y2, bool allowDiagonals)
         {
             int dx = math.abs(x1 - x2);
             int dy = math.abs(y1 - y2);
@@ -23,8 +25,28 @@ namespace Winkeldief.Pathfinding
                 return (dx + dy) * DirectMoveCost;
         }
 
+        /// <summary> Calculates the distance in tiles in a square grid </summary>
         [BurstCompile]
-        public static int CalculateHexDistance(int x1, int y1, int x2, int y2)
+        public static int CalculateSquareTileDistance(int x1, int y1, int x2, int y2, bool allowDiagonals)
+        {
+            int dx = math.abs(x1 - x2);
+            int dy = math.abs(y1 - y2);
+
+            if (allowDiagonals)
+                return math.min(dx, dy) + math.abs(dx - dy);
+            else
+                return (dx + dy);
+        }
+
+        /// <summary> Calculates the cost between two tiles in a hexagonal grid </summary
+        [BurstCompile]
+        public static int CalculateHexCost(int x1, int y1, int x2, int y2)
+        {
+            return CalculateHexCost(x1, y1, x2, y2) * DirectMoveCost;
+        }
+        /// <summary> Calculates the distance in tiles in a hexagonal grid </summary
+        [BurstCompile]
+        public static int CalculateHexTileDistance(int x1, int y1, int x2, int y2)
         {
             int dx = x2 - x1;
             int dy = y2 - y1;
@@ -35,7 +57,7 @@ namespace Winkeldief.Pathfinding
                 adx = math.max(0, adx - (ady + 1) / 2);
             else
                 adx = math.max(0, adx - (ady) / 2);
-            return (adx + ady) * DirectMoveCost;
+            return adx + ady;
         }
         #endregion CalculateDistance
 
@@ -101,7 +123,8 @@ namespace Winkeldief.Pathfinding
         #endregion GetNeighbours
 
         #region Extensions
-        public static int2 ToInt2(this UnityEngine.Vector3Int vec) => new(vec.x, vec.y);
+        public static int2 ToInt2(this Vector3Int vec) => new(vec.x, vec.y);
+        public static Vector3Int ToVec3Int(this int2 vec) => new(vec.x, vec.y);
         #endregion Extensions
     }
 }

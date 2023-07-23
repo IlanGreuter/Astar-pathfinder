@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Winkeldief.Utilities;
+using Winkeldief.Pathfinding.AStar;
 
 namespace Winkeldief.Pathfinding
 {
@@ -30,6 +31,13 @@ namespace Winkeldief.Pathfinding
             Astar astarJob = new(grid, gridSize, gridOffset, output);
             astarJob.SetPath(start, end, maxSearchDistance > 0 ? maxSearchDistance : int.MaxValue);
             return astarJob;
+        }
+
+        private BreadthFirstSearch GetFrontierJob(int2 start, int maxDistance, NativeList<int2> output)
+        {
+            BreadthFirstSearch bfs = new(grid, gridSize, gridOffset, output);
+            bfs.SetPath(start, maxDistance > 0 ? maxDistance : int.MaxValue);
+            return bfs;
         }
 
         /// <summary> Returns a path with each node from start to end </summary>
@@ -87,6 +95,22 @@ namespace Winkeldief.Pathfinding
                 path.AppendPath(segments[i]);
 
             return path;
+        }
+
+        /// <summary> Returns a frontier, aka a list containing all reachable positions </summary>
+        /// <param name="maxDistance"> For reference, the base distance between adjecent tiles is 10 (or 14 for diagonal)" </param>
+        public static List<Vector3Int> FindAllReachableTiles(Vector3Int start, int maxDistance)
+        {
+            NativeList<int2> result = new(Allocator.TempJob);
+            BreadthFirstSearch frontierJob = instance.GetFrontierJob(start.ToInt2(), maxDistance, result);
+            frontierJob.Schedule().Complete();
+
+            List<Vector3Int> frontier = new(result.Length);
+            foreach (int2 v in result)
+                frontier.Add(v.ToVec3Int());
+
+            result.Dispose();
+            return frontier;
         }
         #endregion FindPath
 
