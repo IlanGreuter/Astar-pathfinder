@@ -11,8 +11,9 @@ namespace Winkeldief.Pathfinding
     public class Path
     {
         /// <summary> The list of all points forming this path </summary>
-        List<Vector3Int> path;
-        Vector3 worldOffset;
+        public List<Vector3Int> path;
+        /// <summary> The offset to convert a grid position into a world position </summary>
+        public Vector3 worldOffset;
 
         /// <summary> The starting point of the path </summary>
         public Vector3Int Start => path[0];
@@ -23,7 +24,13 @@ namespace Winkeldief.Pathfinding
         public int Count => path.Count;
         /// <summary> The total length (Sum of distance between all nodes) of the path </summary>
         public float Length => path.Skip(1).Select((point, i) => Vector3Int.Distance(point, path[i])).Sum();
+        
+        /// <summary> Returns an empty path with no nodes and no offset </summary>
+        public static Path EmptyPath => new Path(new(), Vector3Int.zero);
 
+        /// <summary> Offsets a point to where its world position would be </summary>
+        public Vector3 ToWorld(Vector3Int cell) => new Vector3(cell.x + worldOffset.x, cell.y + worldOffset.y);
+        
         public Path(List<Vector3Int> path, Vector3 offset)
         {
             this.path = path is not null ? path : new();
@@ -49,6 +56,12 @@ namespace Winkeldief.Pathfinding
         public Vector3Int GetAtIndex(int index)
         {
             return path[Mathf.Clamp(index, 0, path.Count - 1)];
+        }
+
+        /// <summary> Get the World position of the point at this index. Index is clamped between first and last entry on the path </summary>
+        public Vector3 GetWorldPosAtIndex(int index)
+        {
+            return ToWorld(GetAtIndex(index));
         }
 
         /// <summary> Remove Vector3Int at this index </summary>
@@ -104,13 +117,10 @@ namespace Winkeldief.Pathfinding
 
         /// <summary> Converts the entire path into world coordinates </summary>
         /// <param name="offset"> Optional additional offset </param>
-        public List<Vector3> ToWorld(Vector3 offset)
+        public List<Vector3> PathToWorld(Vector3 offset)
         {
             offset += worldOffset;
             return path.Select(v => Pathfinder.CellToWorld(v)).ToList();
         }
-
-        /// <summary> Returns an empty path with no nodes and no offset </summary>
-        public static Path EmptyPath => new Path(new(), Vector3Int.zero);
     }
 }

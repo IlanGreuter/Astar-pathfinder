@@ -1,27 +1,132 @@
-This package is a tilemap implementation of A*, making use of Unity's Job System and Burst compiler for improved performance.
-As a result, it is dependant on the following packages: 
-Unity Mathematics, Unity Collections, Unity Burst and Unity 2D Tilemap Extras.
+PathfinderBase
+ - Base pathfinder class that handles most logic.
+ - Can be called from anywhere via Pathfinder.instance.
+ - To use it, simply make a class that inherits from it and overrides the GetTileCost method.
 
-The system is designed to be easy to use, performant and extendable. 
-It works with normal tiles, isometric and hexagonal (both flat and pointed top).
+ - Can set the tilemap that the grid will be based off of. 
+	This tilemap will determine the grid's size and what offset is used to convert a grid position to a world position.
+ - Can configure what tile type the grid uses (square, square diagonal and hexagonal).
+ - Can configure the maximum search distance of a path (-1 sets range to unlimited).
+	The distance between two directly adjecent tiles is 10, 
+	and for diagonally adjecent tiles (if diagonals are allowed) it is 14.
+ 
+	static WorldToCell(Vector3)
+	 - Converts a world position into a grid position
 
-This package is compatible with WebGL, 
-however, as WebGL is a silly little goofer, it does not support Unity's Jobs or Burst, 
-meaning it does not benefit from the performance boosts those provide.
-Nevertheless, it should still be quite performant for web-based games.
+	static CellToWorld(Vector3Int)
+	 - Converts a grid position to a world position
+	 - World position will be the center of the tile
+	
+	static FindPath(Vector3Int, Vector3Int)
+	 - Input is two grid positions, one for start point and one for end point
+	 - Finds a path going from the first point to the second.
+	 - Returns empty path if no path is found
 
+	static FindMultiplePaths(List<Vector3Int, Vector3Int>)
+	 - Should be fed a list of Vector3Int tuples with (start, end)
+	 - Sets up jobs to calculate each path at the same time (multithreaded)
+
+	static FindPathAlongRoute(List<Vector3Int>)
+	 - Needs a list of all nodes that should be on the path
+	 - Returns empty path if any node is unreachable from the previous
+
+	static FindAllReachableTiles(Vector3Int, int)
+	 - Returns a list of all reachable tiles from the starting position.
+	 - Can configure the maximum distance (-1 sets range to unlimited).
+		The distance between two directly adjecent tiles is 10, 
+		and for diagonally adjecent tiles (if diagonals are allowed) it is 14.
+	
+	protected virtual ConstructGrid()
+	 - Constructs the grid that will be used to calculate paths
+	 - Automatically called on Awake
+	 - Can be overwritten by subclass, though not recommended in most cases
+	
+	abstract GetTileCost(Vector3Int)
+	 - Calculate the cost a tile should have to walk over that tile.
+	 - Subclasses may want to check what specific tile a tilemap contains or even check from multiple tilemaps.
+
+	UpdateTileCost(Vector3Int, int)
+	 - Updates the cost of a specific tile, without completely reconstructing the grid.
+	 - Should be called if a cost has changed during runtime.
 
 Pathfinder
-The base pathfinder does most of the lifting for you. It can find a path between two positions, or simply find every reachable tile from a starting position.
-You can also find multiple paths at once, which is multithreaded so it calculates multiple paths at the same time.
-The type of grid, whether diagonal movement is allowed and the maximum distance can be configured here.
-It can convert grid positions to world positions and vice versa.
+ - Overrides the GetTileCost method
+ - Sets tiles to be unwalkable is they're occupied, or walkable if freed
 
-You can implement your own rules for what tiles are walkable and what the cost of each individual tile should be, 
-or you can simply use the premade solution that makes any occupied tile unwalkable.
+PathfinderUtility
+ - Contains a couple of handy helper functions
 
-Extras
-- Utility functions like getting the distance between two tiles and getting all neighbours of a tile.
-- A path class with a few useful features, such combining two paths together or removing all non-corner points.
-- A PathDrawer to easily visualise a path.
-- Premade rule-tiles for normal, flat-top hex and pointed-top hex tiles to help you get started with your game!
+	CalculateSquareCost(x1, y1, x2, y2, allowDiagonal)
+	 - Calculates the cost of moving between point 1 and point 2.
+	 - Take diagonal movement into account when calculating the cost
+
+	CalculateSquareTileDistance(x1, y1, x2, y2, allowDiagonal)
+	 - Calculates the number of tiles needed to move from point 1 to point 2.
+	 - Allow diagonal movement when calculating the tiles
+
+	CalculateHexCost(x1, y1, x2, y2)
+	 - Calculates the cost of moving between point 1 and point 2.
+
+	CalculateHexTileDistance(x1, y1, x2, y2)
+	 - Calculates the number of tiles needed to move from point 1 to point 2.
+
+	GetSquareNeighbours(int2 offset, bool includeDiagonals)
+	 - Get all of the neighbours around the offset
+
+	GetHexNeighbours(int2 offset, bool includeDiagonals)
+	 - Get all of the neighbours around the offset
+
+Path
+ - A path of positions in a tilemap grid
+ - Essentially a wrapper class for a List<Vector3Int>
+ - Keeps a world offset to convert a grid position into a world position
+ 
+	Start
+	 - Get the first point of the path
+	End
+	 - Get the last point of the path
+	Count
+	 - Get the number of points on the path
+	Length
+	 - Get the total length of the path (Sum of all the distances between the points)
+	 
+	static EmptyPath
+	 - Returns a path with no points on the path
+
+	ToWorld(Vector3Int)
+	 - Offsets a grid point to where its world position would be
+	 
+	GetAtIndex(int)
+	 - Get the point at an index in the path's list
+	 - Index will be clamped so values outside the list will return the first or last point
+
+	GetWorldPosAtIndex(int)
+	 - Gets the world position of the point at an index
+	 - Clamped to return first or last point on the path when index is outside of list
+
+	RemoveIndex(int)
+	 - Remove the point at that index in the list
+
+	Append(Vector3Int)
+	 - Adds a point to the end of the list
+
+	AppendPath(Path)
+	 - Adds a path at the end of this path
+
+	CompressPath()
+	 - Simplifies path by removing points that lie on straight lines.
+	 - Essentially removes all non-corner points from the path without changing the path's shape.
+
+	OffsetPath(Vector3Int)
+	 - Offsets every point on the path by the specified amount
+
+	PathToWorld(Vector3 offset)
+	 - Returns a list<Vector3> where every point of the path is converted to its world coordinates
+	 - Additional offset can be specified
+
+PathDrawer
+ - Draws a path using a LineRenderer
+ - Gameobject should have a LineRenderer component attached
+
+	SetPath(path)
+  	 - Sets the LineRenderer to draw the path

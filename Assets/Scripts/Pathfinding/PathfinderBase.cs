@@ -22,7 +22,9 @@ namespace Winkeldief.Pathfinding
         [Tooltip("The maximum distance to search for a path. -1 to disable. For reference, the base distance between adjecent tiles is 10 (or 14 for diagonal)")]
         public int maxSearchDistance = -1;
 
+        /// <summary> Returns the grid position of the tile the world position is in </summary>
         public static Vector3Int WorldToCell(Vector3 world) => instance.map.WorldToCell(world);
+        /// <summary> Returns the world coordinates of the center of the grid position </summary>
         public static Vector3 CellToWorld(Vector3Int cell) => instance.map.GetCellCenterWorld(cell);
 
         #region FindPath
@@ -92,7 +94,11 @@ namespace Winkeldief.Pathfinding
             List<Path> segments = FindMultiplePaths(startEnds);
             Path path = segments[0];
             for (int i = 1; i < segments.Count; i++)
+            {
+                if (segments.Count == 0)
+                    return Path.EmptyPath;
                 path.AppendPath(segments[i]);
+            }
 
             return path;
         }

@@ -20,7 +20,7 @@ namespace Winkeldief.Pathfinding
         {
             if (compressPath) path.CompressPath();
             line.positionCount = path.Count;
-            line.SetPositions(path.ToWorld(Vector3.zero).ToArray());
+            line.SetPositions(path.PathToWorld(Vector3.zero).ToArray());
         }
     }
 }

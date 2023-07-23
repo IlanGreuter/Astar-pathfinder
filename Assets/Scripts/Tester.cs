@@ -66,7 +66,7 @@ public class Tester : MonoBehaviour
         {
             var l = HoveredTile();
             if (l != last)
-                drawer.SetPath(Pathfinder.FindPath(c, l));
+                drawer.SetPath(Pathfinder.FindPath(new(-4, 3), new(43, -6)));
             last = l;
         }
     }
