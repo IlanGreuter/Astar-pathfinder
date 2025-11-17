@@ -150,12 +150,13 @@ namespace Winkeldief.Pathfinding
         public abstract int GetTileCost(Vector3Int cell);
 
         /// <summary> Update a tile's cost without having to reconstruct the entire grid </summary>
-        public void UpdateTileCost(Vector3Int cell, int cost)
+        public static void UpdateTileCost(Vector3Int cell, int cost)
         {
-            int i = cell.x + (cell.y * gridSize.x);
-            AstarTile tile = grid[i];
+            cell -= instance.gridOffset.ToVec3Int();
+            int i = cell.x + (cell.y * instance.gridSize.x);
+            AstarTile tile = instance.grid[i];
             tile.Cost = cost;
-            grid[i] = tile;
+            instance.grid[i] = tile;
         }
 
         protected override void Awake()
